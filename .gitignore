@@ -1,14 +1,29 @@
-﻿# Visual Studio filer
+﻿# Byggeoutput
+bin/
+obj/
+dist/
+docs/
+
+# VS spesifikke
 .vs/
+.vscode/
 *.user
 *.suo
 
-# Byggefiler
-bin/
-obj/
+# Netlify: kun hold kildekode
+!wwwroot/
+!Pages/
+!Components/
+!Services/
+!*.razor
+!*.cs
+!*.csproj
+!*.sln
+!App.razor
+!Program.cs
 
-# Ignorer alt annet enn docs
-*
-!docs/
-!docs/**
-!.gitignore
+# Ignorer Blazor outputfiler
+wwwroot/_framework/
+*.dll
+*.pdb
+*.wasm

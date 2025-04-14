@@ -9,7 +9,7 @@
 <p><strong>Timer:</strong> @KTState.GetFormattedTimer()</p>
 <p><strong>By:</strong> @KTState.CurrentCity</p>
 
-<button class="kt-action" @onclick="ToggleBunker">
+<button class="kt-action" @onclick="ToggleBunker" tabindex="-1">
     @(KTState.IsInBunker ? "Gå ut av bunker" : "Gå inn i bunker")
 </button>
 
