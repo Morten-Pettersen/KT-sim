@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "KTSimulator",
   "resources": {
-    "hash": "sha256-5XgJvkLqzNkCiZdPP66JiWe7Udq184z+BhsyqG3DhQg=",
+    "hash": "sha256-WkD745PgEWZphLWRKo0IJ3na6gP3pNETtVqxLsG8nCE=",
     "jsModuleNative": {
       "dotnet.native.js": "sha256-DTUQS6Jc6BNnS7sYYezFfaUKVmQq0/lanhQuJfygH/k="
     },
@@ -18,7 +18,7 @@
     },
     "coreAssembly": {},
     "assembly": {
-      "KTSimulator.wasm": "sha256-kIcZaczUV9yDa/f5m4kHQKGTK/tmq9iA8fH2fOLoAV8=",
+      "KTSimulator.wasm": "sha256-FZuYnQF1U0ndU574ObQgTj983GAptA2BhjLMTykwquc=",
       "Microsoft.AspNetCore.Components.wasm": "sha256-M621ZyNFUeu7y5017tcuuCXXo3XWhMpfmp/Hb0UIlvc=",
       "Microsoft.AspNetCore.Components.Web.wasm": "sha256-w0KyreXBqjETr6mhqi7G13Lrp2kYvCQwJrjDAARf8Wc=",
       "Microsoft.AspNetCore.Components.WebAssembly.wasm": "sha256-eNcZI4zVnxg29F/qNblTjo16Z+mAuAGIJpq6mXzNjDg=",
