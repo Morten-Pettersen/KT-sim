@@ -14,13 +14,6 @@
 </head>
 
 <body>
-    <div id="app">
-        <svg class="loading-progress">
-            <circle r="40%" cx="50%" cy="50%" />
-            <circle r="40%" cx="50%" cy="50%" />
-        </svg>
-        <div class="loading-progress-text"></div>
-    </div>
 
     <div id="user-info" style="display: none; padding: 0.5rem 1rem; background: #222; color: white; font-family: sans-serif;">
         Logget inn som: <span id="user-name"></span>
@@ -31,6 +24,14 @@
         <label for="username">Velg brukernavn:</label>
         <input type="text" id="username" />
         <button onclick="saveUsername()">Lagre</button>
+    </div>
+
+    <div id="app">
+        <svg class="loading-progress">
+            <circle r="40%" cx="50%" cy="50%" />
+            <circle r="40%" cx="50%" cy="50%" />
+        </svg>
+        <div class="loading-progress-text"></div>
     </div>
 
     <div id="blazor-error-ui">
@@ -50,6 +51,11 @@
             const user = window.netlifyIdentity.currentUser();
             const newUsername = document.getElementById("username").value;
 
+            if (!newUsername || newUsername.length < 2) {
+                alert("Brukernavnet må ha minst 2 tegn.");
+                return;
+            }
+
             user.update({
                 app_metadata: {
                     username: newUsername
@@ -57,9 +63,14 @@
             }).then(updatedUser => {
                 document.getElementById("user-name").textContent = updatedUser.app_metadata.username;
                 document.getElementById("username-setup").style.display = "none";
+                alert("Brukernavn lagret!");
+            }).catch(error => {
+                console.error("Feil ved lagring av brukernavn:", error);
+                alert("Noe gikk galt. Prøv igjen.");
             });
         }
 
+            
         if (window.netlifyIdentity) {
             window.netlifyIdentity.on("init", user => {
                 if (!user) {
@@ -71,6 +82,7 @@
             });
 
             window.netlifyIdentity.on("login", user => {
+                window.netlifyIdentity.close();
                 showApp(user);
             });
 
