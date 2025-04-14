@@ -57,15 +57,15 @@
             }
 
             user.update({
-                app_metadata: {
+                user_metadata: {
                     username: newUsername
                 }
             }).then(updatedUser => {
-                document.getElementById("user-name").textContent = updatedUser.app_metadata.username;
+                document.getElementById("user-name").textContent = updatedUser.user_metadata.username;
                 document.getElementById("username-setup").style.display = "none";
                 alert("Brukernavn lagret!");
-            }).catch(error => {
-                console.error("Feil ved lagring av brukernavn:", error);
+            }).catch(err => {
+                console.error("Feil ved lagring:", err);
                 alert("Noe gikk galt. Prøv igjen.");
             });
         }
@@ -95,7 +95,7 @@
             document.getElementById("app").style.display = "block";
             document.getElementById("user-info").style.display = "block";
 
-            const username = user.app_metadata && user.app_metadata.username;
+            const username = user.user_metadata && user.user_metadata.username;
             if (username) {
                 document.getElementById("user-name").textContent = username;
             } else {
