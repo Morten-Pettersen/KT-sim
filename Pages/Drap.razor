@@ -1,0 +1,38 @@
+﻿@page "/drap"
+@inject KTState KTState
+
+<h1>Drap</h1>
+<img src="images/Drap.jpg" alt="Drap" class="kt-page-image" /> 
+
+
+<p><strong>Status:</strong> @(KTState.IsInBunker ? "Du er i bunker" : "Ute av bunker")</p>
+<p><strong>Timer:</strong> @KTState.GetFormattedTimer()</p>
+<p><strong>By:</strong> @KTState.CurrentCity</p>
+
+<button class="kt-action" @onclick="Shoot" disabled="@KTState.IsInBunker">
+    Skyt mot mål
+</button>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <p>@message</p>
+}
+
+@code {
+    private string? message;
+
+    protected override void OnInitialized()
+    {
+        KTState.OnChange += StateHasChanged;
+    }
+
+    private void Shoot()
+    {
+        message = $"Skjøt fra {KTState.CurrentCity} ({DateTime.Now:T})";
+    }
+
+    public void Dispose()
+    {
+        KTState.OnChange -= StateHasChanged;
+    }
+}

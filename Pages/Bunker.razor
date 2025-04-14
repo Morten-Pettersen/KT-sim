@@ -1,0 +1,31 @@
+﻿@page "/bunker"
+@inject KTState KTState
+
+<h1>Bunker</h1>
+<img src="images/Bunker.jpg" alt="Bunker" class="kt-page-image" />
+
+
+<p><strong>Status:</strong> @(KTState.IsInBunker ? "Du er i bunker" : "Ute av bunker")</p>
+<p><strong>Timer:</strong> @KTState.GetFormattedTimer()</p>
+<p><strong>By:</strong> @KTState.CurrentCity</p>
+
+<button class="kt-action" @onclick="ToggleBunker">
+    @(KTState.IsInBunker ? "Gå ut av bunker" : "Gå inn i bunker")
+</button>
+
+@code {
+    protected override void OnInitialized()
+    {
+        KTState.OnChange += StateHasChanged;
+    }
+
+    private void ToggleBunker()
+    {
+        KTState.ToggleBunker();
+    }
+
+    public void Dispose()
+    {
+        KTState.OnChange -= StateHasChanged;
+    }
+}

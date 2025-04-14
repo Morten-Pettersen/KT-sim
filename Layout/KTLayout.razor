@@ -1,0 +1,22 @@
+﻿@namespace KTSimulator.Layout
+@inherits LayoutComponentBase
+
+<header class="kt-banner">
+    <img src="images/Banner.png" alt="KillTime Simulator" class="kt-banner-image" />
+</header>
+
+<div class="kt-layout">
+    <aside class="kt-sidebar">
+        <a href="/" class="kt-nav-button">Hjem</a>
+        <a href="/bunker" class="kt-nav-button">Bunker</a>
+        <a href="/drap" class="kt-nav-button">Drap</a>
+        <a href="/flyplass" class="kt-nav-button">Flyplass</a>
+    </aside>
+
+    <main class="kt-main">
+        <div class="kt-container">
+            @Body
+        </div>
+    </main>
+
+</div>

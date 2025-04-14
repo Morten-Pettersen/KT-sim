@@ -1,0 +1,53 @@
+﻿@page "/"
+@inject KTState KTState
+
+<h1>KT Simulator</h1>
+
+<p><strong>Status:</strong> @(KTState.IsInBunker ? "Du er i bunker" : "Ute av bunker")</p>
+<p><strong>Timer:</strong> @KTState.GetFormattedTimer()</p>
+<p><strong>By:</strong> @KTState.CurrentCity</p>
+
+<p>
+    <a href="/bunker">🛡 Gå til Bunker</a><br />
+    <a href="/drap">🔫 Gå til Drap</a><br />
+    <a href="/flyplass">✈ Gå til Flyplass</a>
+</p>
+
+<h2>Logg over bunker-aktivitet</h2>
+@if (KTState.BunkerLog.Any())
+{
+    <table class="kt-log-table">
+        <thead>
+            <tr>
+                <th>Tidspunkt</th>
+                <th>Ute i</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var entry in KTState.BunkerLog)
+            {
+                <tr>
+                    <td>@entry.Timestamp.ToString("HH:mm:ss")</td>
+                    <td>@(entry.Duration != TimeSpan.Zero ? entry.Duration.ToString("mm\\:ss\\.fff") : "-")</td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Ingen bunkerlogg ennå.</p>
+}
+
+@code {
+    protected override void OnInitialized()
+    {
+        KTState.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        KTState.OnChange -= StateHasChanged;
+    }
+}

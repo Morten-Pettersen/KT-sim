@@ -1,0 +1,60 @@
+﻿@page "/flyplass"
+@inject KTState KTState
+
+<h1>Flyplass</h1>
+<img src="images/Flyplass.jpg" alt="Flyplass" class="kt-page-image" /> 
+
+
+<p><strong>Status:</strong> @(KTState.IsInBunker ? "Du er i bunker" : "Ute av bunker")</p>
+<p><strong>Timer:</strong> @KTState.GetFormattedTimer()</p>
+<p><strong>By:</strong> @KTState.CurrentCity</p>
+
+<select @onchange="SelectCity">
+    <option disabled selected>Velg by</option>
+    @foreach (var city in cities.Where(c => c != KTState.CurrentCity))
+    {
+        <option value="@city">@city</option>
+    }
+</select>
+
+<button class="kt-action" @onclick="ConfirmFlight">
+    Fly
+</button>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <p>@message</p>
+}
+
+@code {
+    private string? selectedCity;
+    private string? message;
+    private List<string> cities = new() { "Oslo", "Stockholm", "København", "Helsinki", "London", "Moskva" };
+
+    protected override void OnInitialized()
+    {
+        KTState.OnChange += StateHasChanged;
+    }
+
+    private void SelectCity(ChangeEventArgs e)
+    {
+        selectedCity = e.Value?.ToString();
+    }
+
+    private void ConfirmFlight()
+    {
+        if (string.IsNullOrWhiteSpace(selectedCity))
+        {
+            message = "Du må velge en by før du kan fly.";
+            return;
+        }
+
+        KTState.FlyTo(selectedCity);
+        message = $"Fløy til {selectedCity} ({DateTime.Now:T})";
+    }
+
+    public void Dispose()
+    {
+        KTState.OnChange -= StateHasChanged;
+    }
+}
