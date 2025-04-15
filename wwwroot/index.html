@@ -9,8 +9,8 @@
     <link rel="stylesheet" href="css/app.css" />
     <link href="css/ktlayout.css" rel="stylesheet" />
 
-    <!-- If you add any scoped CSS files, uncomment the following to load them
-    <link href="KTSimulator.styles.css" rel="stylesheet" /> -->
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
+
 </head>
 
 <body>
@@ -18,7 +18,9 @@
     <div id="user-info" style="display: none; padding: 0.5rem 1rem; background: #222; color: white; font-family: sans-serif;">
         Logget inn som: <span id="user-name"></span>
         <button onclick="logout()" style="margin-left: 1rem; padding: 0.2rem 0.5rem;">Logg ut</button>
+        <button onclick="editUsername()" style="margin-left: 0.5rem; padding: 0.2rem 0.5rem;">Endre brukernavn</button>
     </div>
+
 
     <div id="username-setup" style="display:none; margin-top:1rem;">
         <label for="username">Velg brukernavn:</label>
@@ -47,30 +49,70 @@
             window.netlifyIdentity.logout();
         }
 
-        function saveUsername() {
+        function editUsername() {
             const user = window.netlifyIdentity.currentUser();
-            const newUsername = document.getElementById("username").value;
+            const currentUsername = user.user_metadata && user.user_metadata.username;
+
+            // Sett eksisterende brukernavn i inputfeltet (valgfritt)
+            document.getElementById("username").value = currentUsername || "";
+
+            // Vis inputfeltet igjen
+            document.getElementById("username-setup").style.display = "block";
+
+            document.getElementById("username-setup").style.display = "none";
+            document.getElementById("user-name").textContent = updatedUser.user_metadata.username;
+
+        }
+
+        const supabase = supabase.createClient(
+            "https://mstuovyusowislwmsvzq.supabase.co",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zdHVvdnl1c293aXNsd21zdnpxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2OTc2MzUsImV4cCI6MjA2MDI3MzYzNX0.Dsg08bwimDDIud6L7H7P98kVRchzeNYTfkUM1r4m3rY"
+        );
+
+        async function saveUsername() {
+            const user = window.netlifyIdentity.currentUser();
+            const newUsername = document.getElementById("username").value.trim();
 
             if (!newUsername || newUsername.length < 2) {
                 alert("Brukernavnet må ha minst 2 tegn.");
                 return;
             }
 
-            user.update({
-                user_metadata: {
-                    username: newUsername
-                }
-            }).then(updatedUser => {
-                document.getElementById("user-name").textContent = updatedUser.user_metadata.username;
-                document.getElementById("username-setup").style.display = "none";
-                alert("Brukernavn lagret!");
-            }).catch(err => {
-                console.error("Feil ved lagring:", err);
-                alert("Noe gikk galt. Prøv igjen.");
-            });
+            // 1. Sjekk om brukernavn finnes
+            const { data: existing, error: checkError } = await supabase
+                .from("users")
+                .select("username")
+                .eq("username", newUsername)
+                .single();
+
+            if (existing) {
+                alert("Brukernavnet er allerede i bruk.");
+                return;
+            }
+
+            // 2. Legg til i Supabase
+            const { error: insertError } = await supabase.from("users").insert([{
+                id: user.id,
+                email: user.email,
+                username: newUsername
+            }]);
+
+            if (insertError) {
+                console.error("Feil ved lagring i Supabase:", insertError);
+                alert("Kunne ikke lagre brukernavn.");
+                return;
+            }
+
+            // 3. Oppdater lokalt (så det vises riktig)
+            user.user_metadata = user.user_metadata || {};
+            user.user_metadata.username = newUsername;
+            document.getElementById("user-name").textContent = newUsername;
+            document.getElementById("username-setup").style.display = "none";
+            alert("Brukernavn lagret!");
         }
 
-            
+
+
         if (window.netlifyIdentity) {
             window.netlifyIdentity.on("init", user => {
                 if (!user) {
@@ -96,6 +138,7 @@
             document.getElementById("user-info").style.display = "block";
 
             const username = user.user_metadata && user.user_metadata.username;
+
             if (username) {
                 document.getElementById("user-name").textContent = username;
             } else {
@@ -103,6 +146,7 @@
                 document.getElementById("username-setup").style.display = "block";
             }
         }
+
     </script>
 
 
