@@ -45,24 +45,21 @@
 
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <script>
+        const supa = window.supabase.createClient(
+            "https://mstuovyusowislwmsvzq.supabase.co",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        );
+
         function logout() {
             window.netlifyIdentity.logout();
         }
 
         function editUsername() {
             const user = window.netlifyIdentity.currentUser();
-            const currentUsername = user.user_metadata && user.user_metadata.username;
-
+            const currentUsername = user.user_metadata?.username;
             document.getElementById("username").value = currentUsername || "";
             document.getElementById("username-setup").style.display = "block";
         }
-
-                    
-        const supa = window.supabase.createClient(
-            "https://mstuovyusowislwmsvzq.supabase.co",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zdHVvdnl1c293aXNsd21zdnpxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2OTc2MzUsImV4cCI6MjA2MDI3MzYzNX0.Dsg08bwimDDIud6L7H7P98kVRchzeNYTfkUM1r4m3rY"
-        );
-
 
         async function saveUsername() {
             const user = window.netlifyIdentity.currentUser();
@@ -73,34 +70,32 @@
                 return;
             }
 
-            // 1. Sjekk om brukernavn finnes
-            const { error: insertError } = await supa.from("users").upsert([{
-                id: user.id,
-                email: user.email,
-                username: newUsername
-            }]);
+            // Sjekk om noen andre har dette brukernavnet
+            const { data: existingUser, error: checkError } = await supa
+                .from("users")
+                .select("id")
+                .eq("username", newUsername)
+                .neq("id", user.id) // Ikke blokker egen oppdatering
+                .maybeSingle();
 
-
-            if (existing) {
+            if (existingUser) {
                 alert("Brukernavnet er allerede i bruk.");
                 return;
             }
 
-            // 2. Legg til i Supabase
-            const { error: insertError } = await supa.from("users").insert([{
+            // Upsert brukeren
+            const { error: upsertError } = await supa.from("users").upsert([{
                 id: user.id,
                 email: user.email,
                 username: newUsername
-            
             }]);
 
-            if (insertError) {
-                console.error("Feil ved lagring i Supabase:", insertError);
+            if (upsertError) {
+                console.error("Feil ved lagring i Supabase:", upsertError);
                 alert("Kunne ikke lagre brukernavn.");
                 return;
             }
 
-            // 3. Oppdater lokalt (så det vises riktig)
             user.user_metadata = user.user_metadata || {};
             user.user_metadata.username = newUsername;
             document.getElementById("user-name").textContent = newUsername;
@@ -115,7 +110,7 @@
             const { data, error } = await supa
                 .from("users")
                 .select("username")
-                .eq("id", user.id)  // tryggere og raskere
+                .eq("id", user.id)
                 .single();
 
             if (error) {
@@ -126,10 +121,8 @@
             return data?.username || null;
         }
 
-
-
         async function logTime(durationMs) {
-            const username = await getUsernameForCurrentUser();
+            const user = window.netlifyIdentity.currentUser();
             if (!user) {
                 console.warn("Ingen bruker logget inn.");
                 return;
@@ -153,7 +146,6 @@
                 console.log(`Logget tid: ${durationMs}ms for ${username}`);
             }
         }
-
 
         async function getMyTimes() {
             const user = window.netlifyIdentity.currentUser();
@@ -188,8 +180,6 @@
             return data;
         }
 
-
-
         if (window.netlifyIdentity) {
             window.netlifyIdentity.init();
             window.netlifyIdentity.on("init", user => {
@@ -215,8 +205,7 @@
             document.getElementById("app").style.display = "block";
             document.getElementById("user-info").style.display = "block";
 
-            const username = user.user_metadata && user.user_metadata.username;
-
+            const username = user.user_metadata?.username;
             if (username) {
                 document.getElementById("user-name").textContent = username;
             } else {
@@ -224,8 +213,8 @@
                 document.getElementById("username-setup").style.display = "block";
             }
         }
-
     </script>
+
 
 
 
