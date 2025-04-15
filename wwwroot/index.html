@@ -180,14 +180,16 @@
             return data;
         }
 
-        document.addEventListener("DOMContentLoaded", function () {
+        function initializeNetlifyIdentity() {
             const identity = window.netlifyIdentity;
-
-            if (!identity) return;
+            if (!identity) {
+                console.error("Netlify Identity ikke funnet!");
+                return;
+            }
 
             identity.on("init", user => {
                 if (!user) {
-                    identity.open(); // vis login popup
+                    identity.open(); // Vis popup!
                     document.getElementById("app").style.display = "none";
                 } else {
                     showApp(user);
@@ -203,7 +205,27 @@
                 location.reload();
             });
 
-            identity.init(); // Kjør init én gang, når DOM er klar
+            identity.init();
+        }
+
+        // Kjør når DOM er klar
+        document.addEventListener("DOMContentLoaded", function () {
+            // Vent til widgeten er lastet
+            if (window.netlifyIdentity) {
+                initializeNetlifyIdentity();
+            } else {
+                // Prøv igjen hvert 100ms i inntil 2 sekunder
+                let tries = 0;
+                const interval = setInterval(() => {
+                    if (window.netlifyIdentity) {
+                        clearInterval(interval);
+                        initializeNetlifyIdentity();
+                    } else if (++tries > 20) {
+                        clearInterval(interval);
+                        console.error("Netlify Identity ble ikke tilgjengelig.");
+                    }
+                }, 100);
+            }
         });
 
 
