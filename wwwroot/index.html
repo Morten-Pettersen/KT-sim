@@ -180,16 +180,23 @@
             return data;
         }
 
-        if (window.netlifyIdentity) {
-            window.netlifyIdentity.init();
-            window.netlifyIdentity.on("init", user => {
-                if (!user) {
-                    window.netlifyIdentity.open();
-                    document.getElementById("app").style.display = "none";
-                } else {
-                    showApp(user);
+        if (!window.netlifyIdentity) {
+            document.addEventListener("DOMContentLoaded", function () {
+                if (window.netlifyIdentity) {
+                    window.netlifyIdentity.on("init", user => {
+                        if (!user) {
+                            window.netlifyIdentity.open();
+                            document.getElementById("app").style.display = "none";
+                        } else {
+                            showApp(user);
+                        }
+                    });
+
+                    window.netlifyIdentity.init();
                 }
             });
+        }
+
 
             window.netlifyIdentity.on("login", user => {
                 window.netlifyIdentity.close();
@@ -199,7 +206,7 @@
             window.netlifyIdentity.on("logout", () => {
                 location.reload();
             });
-        }
+        
 
         function showApp(user) {
             document.getElementById("app").style.display = "block";
