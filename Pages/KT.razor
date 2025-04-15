@@ -1,11 +1,8 @@
 ﻿@page "/"
 @inject KTState KTState
+@inject IJSRuntime JS
 
 <h1>KT Simulator</h1>
-
-<p><strong>Status:</strong> @(KTState.IsInBunker ? "Du er i bunker" : "Ute av bunker")</p>
-<p><strong>Timer:</strong> @KTState.GetFormattedTimer()</p>
-<p><strong>By:</strong> @KTState.CurrentCity</p>
 
 <p>
     <a href="/bunker">🛡 Gå til Bunker</a><br />
@@ -13,23 +10,22 @@
     <a href="/flyplass">✈ Gå til Flyplass</a>
 </p>
 
-<h2>Logg over bunker-aktivitet</h2>
-@if (KTState.BunkerLog.Any())
+<h2>Min bunkerlogg</h2>
+@if (MyLog.Any())
 {
     <table class="kt-log-table">
         <thead>
             <tr>
                 <th>Tidspunkt</th>
-                <th>Ute i</th>
+                <th>Varighet</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var entry in KTState.BunkerLog)
+            @foreach (var entry in MyLog)
             {
                 <tr>
-                    <td>@entry.Timestamp.ToString("HH:mm:ss")</td>
-                    <td>@(entry.Duration != TimeSpan.Zero ? entry.Duration.ToString("mm\\:ss\\.fff") : "-")</td>
-
+                    <td>@entry.Created_At.ToString("HH:mm:ss")</td>
+                    <td>@TimeSpan.FromMilliseconds(entry.Duration).ToString("mm\\:ss\\.fff")</td>
                 </tr>
             }
         </tbody>
@@ -37,17 +33,59 @@
 }
 else
 {
+    <p>Ingen loggdata funnet.</p>
+}
+
+<h2>Toppliste (Raskeste tider)</h2>
+@if (Top10.Any())
+{
+    <table class="kt-log-table">
+        <thead>
+            <tr>
+                <th>Bruker</th>
+                <th>Tid</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var entry in Top10)
+            {
+                <tr>
+                    <td>@entry.Username</td>
+                    <td>@TimeSpan.FromMilliseconds(entry.Duration).ToString("mm\\:ss\\.fff")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Ingen tider registrert ennå.</p>
+}
+
+else
+{
     <p>Ingen bunkerlogg ennå.</p>
 }
 
 @code {
-    protected override void OnInitialized()
+    public class PersonalTime
     {
-        KTState.OnChange += StateHasChanged;
+        public int Duration { get; set; }
+        public DateTime Created_At { get; set; }
     }
 
-    public void Dispose()
+    public class TopTime
     {
-        KTState.OnChange -= StateHasChanged;
+        public string Username { get; set; } = string.Empty;
+        public int Duration { get; set; }
+    }
+
+    private List<PersonalTime> MyLog = new();
+    private List<TopTime> Top10 = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        MyLog = await JS.InvokeAsync<List<PersonalTime>>("getMyTimes");
+        Top10 = await JS.InvokeAsync<List<TopTime>>("getTop10");
     }
 }

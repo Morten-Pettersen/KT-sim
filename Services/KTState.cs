@@ -1,6 +1,6 @@
 ﻿using Timer = System.Timers.Timer;
 using System.Diagnostics;
-
+using Microsoft.JSInterop;
 
 namespace KTSimulator.Services
 {
@@ -13,13 +13,16 @@ namespace KTSimulator.Services
 
         private readonly Timer _timer;
         private Stopwatch? stopwatch;
+        private readonly IJSRuntime _js;
 
         public List<(DateTime Timestamp, TimeSpan Duration)> BunkerLog { get; } = new();
 
         private string timerDisplay = "00:00.000";
 
-        public KTState()
+        public KTState(IJSRuntime js)
         {
+            _js = js;
+
             _timer = new Timer(50); // 20 oppdateringer per sekund
             _timer.Elapsed += (s, e) =>
             {
@@ -46,6 +49,11 @@ namespace KTSimulator.Services
                 if (stopwatch != null && stopwatch.IsRunning)
                 {
                     stopwatch.Stop();
+
+                    // Logg til Supabase
+                    var durationMs = (int)stopwatch.Elapsed.TotalMilliseconds;
+                    _ = _js.InvokeVoidAsync("logTime", durationMs);
+
                     BunkerLog.Insert(0, (DateTime.Now, stopwatch.Elapsed));
                 }
 

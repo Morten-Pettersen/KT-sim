@@ -107,6 +107,59 @@
             alert("Brukernavn lagret!");
         }
 
+        async function logTime(durationMs) {
+            const user = window.netlifyIdentity.currentUser();
+            if (!user || !user.user_metadata?.username) {
+                console.warn("Kan ikke logge – mangler bruker eller brukernavn");
+                return;
+            }
+
+            const { error } = await supa.from("times").insert([{
+                user_id: user.id,
+                username: user.user_metadata.username,
+                duration: durationMs
+            }]);
+
+            if (error) {
+                console.error("Feil ved logging av tid:", error);
+            } else {
+                console.log(`Logget tid: ${durationMs}ms for ${user.user_metadata.username}`);
+            }
+        }
+
+        async function getMyTimes() {
+            const user = window.netlifyIdentity.currentUser();
+            if (!user) return [];
+
+            const { data, error } = await supa
+                .from("times")
+                .select("duration, created_at")
+                .eq("user_id", user.id)
+                .order("created_at", { ascending: false });
+
+            if (error) {
+                console.error("Feil ved henting av egne tider:", error);
+                return [];
+            }
+
+            return data;
+        }
+
+        async function getTop10() {
+            const { data, error } = await supa
+                .from("times")
+                .select("username, duration")
+                .order("duration", { ascending: true })
+                .limit(10);
+
+            if (error) {
+                console.error("Feil ved henting av toppliste:", error);
+                return [];
+            }
+
+            return data;
+        }
+
 
 
         if (window.netlifyIdentity) {
