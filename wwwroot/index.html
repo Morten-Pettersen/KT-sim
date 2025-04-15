@@ -74,11 +74,12 @@
             }
 
             // 1. Sjekk om brukernavn finnes
-            const { data: existing, error: checkError } = await supa
-                .from("users")
-                .select("username", { count: "exact", head: false })
-                .eq("username", newUsername)
-                .single();
+            const { error: insertError } = await supa.from("users").upsert([{
+                id: user.id,
+                email: user.email,
+                username: newUsername
+            }]);
+
 
             if (existing) {
                 alert("Brukernavnet er allerede i bruk.");
@@ -107,25 +108,52 @@
             alert("Brukernavn lagret!");
         }
 
-        async function logTime(durationMs) {
+        async function getUsernameForCurrentUser() {
             const user = window.netlifyIdentity.currentUser();
-            if (!user || !user.user_metadata?.username) {
-                console.warn("Kan ikke logge – mangler bruker eller brukernavn");
+            if (!user) return null;
+
+            const { data, error } = await supa
+                .from("users")
+                .select("username")
+                .eq("id", user.id)  // tryggere og raskere
+                .single();
+
+            if (error) {
+                console.error("Kunne ikke hente brukernavn:", error);
+                return null;
+            }
+
+            return data?.username || null;
+        }
+
+
+
+        async function logTime(durationMs) {
+            const username = await getUsernameForCurrentUser();
+            if (!user) {
+                console.warn("Ingen bruker logget inn.");
+                return;
+            }
+
+            const username = await getUsernameForCurrentUser();
+            if (!username) {
+                console.warn("Fant ikke brukernavn for bruker");
                 return;
             }
 
             const { error } = await supa.from("times").insert([{
                 user_id: user.id,
-                username: user.user_metadata.username,
+                username: username,
                 duration: durationMs
             }]);
 
             if (error) {
                 console.error("Feil ved logging av tid:", error);
             } else {
-                console.log(`Logget tid: ${durationMs}ms for ${user.user_metadata.username}`);
+                console.log(`Logget tid: ${durationMs}ms for ${username}`);
             }
         }
+
 
         async function getMyTimes() {
             const user = window.netlifyIdentity.currentUser();
