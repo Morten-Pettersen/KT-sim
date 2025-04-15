@@ -76,7 +76,7 @@
             // 1. Sjekk om brukernavn finnes
             const { data: existing, error: checkError } = await supa
                 .from("users")
-                .select("username")
+                .select("username", { count: "exact", head: false })
                 .eq("username", newUsername)
                 .single();
 
