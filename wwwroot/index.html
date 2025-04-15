@@ -53,17 +53,11 @@
             const user = window.netlifyIdentity.currentUser();
             const currentUsername = user.user_metadata && user.user_metadata.username;
 
-            // Sett eksisterende brukernavn i inputfeltet (valgfritt)
             document.getElementById("username").value = currentUsername || "";
-
-            // Vis inputfeltet igjen
             document.getElementById("username-setup").style.display = "block";
-
-            document.getElementById("username-setup").style.display = "none";
-            document.getElementById("user-name").textContent = updatedUser.user_metadata.username;
-
         }
 
+                    
         const supabase = supabase.createClient(
             "https://mstuovyusowislwmsvzq.supabase.co",
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zdHVvdnl1c293aXNsd21zdnpxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2OTc2MzUsImV4cCI6MjA2MDI3MzYzNX0.Dsg08bwimDDIud6L7H7P98kVRchzeNYTfkUM1r4m3rY"
