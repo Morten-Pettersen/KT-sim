@@ -24,7 +24,11 @@
             @foreach (var entry in MyLog)
             {
                 <tr>
-                    <td>@entry.Created_At.ToString("HH:mm:ss")</td>
+                    <td>
+                        @(entry.Created_At.HasValue
+                            ? entry.Created_At.Value.ToString("HH:mm:ss")
+                            : "-")
+                    </td>
                     <td>@TimeSpan.FromMilliseconds(entry.Duration).ToString("mm\\:ss\\.fff")</td>
                 </tr>
             }
@@ -71,7 +75,7 @@ else
     public class PersonalTime
     {
         public int Duration { get; set; }
-        public DateTimeOffset Created_At { get; set; }
+        public DateTimeOffset? Created_At { get; set; }
     }
 
     public class TopTime
