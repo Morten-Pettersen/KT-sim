@@ -58,10 +58,11 @@
         }
 
                     
-        const supabase = supabase.createClient(
+        const supa = window.supabase.createClient(
             "https://mstuovyusowislwmsvzq.supabase.co",
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zdHVvdnl1c293aXNsd21zdnpxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2OTc2MzUsImV4cCI6MjA2MDI3MzYzNX0.Dsg08bwimDDIud6L7H7P98kVRchzeNYTfkUM1r4m3rY"
         );
+
 
         async function saveUsername() {
             const user = window.netlifyIdentity.currentUser();
@@ -73,7 +74,7 @@
             }
 
             // 1. Sjekk om brukernavn finnes
-            const { data: existing, error: checkError } = await supabase
+            const { data: existing, error: checkError } = await supa
                 .from("users")
                 .select("username")
                 .eq("username", newUsername)
@@ -85,10 +86,11 @@
             }
 
             // 2. Legg til i Supabase
-            const { error: insertError } = await supabase.from("users").insert([{
+            const { error: insertError } = await supa.from("users").insert([{
                 id: user.id,
                 email: user.email,
                 username: newUsername
+            
             }]);
 
             if (insertError) {
@@ -108,6 +110,7 @@
 
 
         if (window.netlifyIdentity) {
+            window.netlifyIdentity.init();
             window.netlifyIdentity.on("init", user => {
                 if (!user) {
                     window.netlifyIdentity.open();
