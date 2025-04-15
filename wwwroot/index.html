@@ -180,51 +180,32 @@
             return data;
         }
 
-        if (window.netlifyIdentity) {
-            window.netlifyIdentity.on("init", user => {
+        document.addEventListener("DOMContentLoaded", function () {
+            const identity = window.netlifyIdentity;
+
+            if (!identity) return;
+
+            identity.on("init", user => {
                 if (!user) {
-                    window.netlifyIdentity.open(); 
+                    identity.open(); // vis login popup
                     document.getElementById("app").style.display = "none";
                 } else {
                     showApp(user);
                 }
             });
 
-            window.netlifyIdentity.on("login", user => {
-                window.netlifyIdentity.close();
+            identity.on("login", user => {
+                identity.close();
                 showApp(user);
             });
 
-            window.netlifyIdentity.on("logout", () => {
+            identity.on("logout", () => {
                 location.reload();
             });
 
-            window.netlifyIdentity.init(); 
-        }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            if (window.netlifyIdentity) {
-                window.netlifyIdentity.on("init", user => {
-                    if (!user) {
-                        window.netlifyIdentity.open();
-                        document.getElementById("app").style.display = "none";
-                    } else {
-                        showApp(user);
-                    }
-                });
-
-                window.netlifyIdentity.on("login", user => {
-                    window.netlifyIdentity.close();
-                    showApp(user);
-                });
-
-                window.netlifyIdentity.on("logout", () => {
-                    location.reload();
-                });
-
-                window.netlifyIdentity.init();
-            }
+            identity.init(); // Kjør init én gang, når DOM er klar
         });
+
 
 
         function showApp(user) {
