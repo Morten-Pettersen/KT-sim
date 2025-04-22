@@ -11,7 +11,7 @@
 </p>
 
 <h2>Min bunkerlogg</h2>
-@if (MyLog.Any())
+@if (MyLog?.Any() == true)
 {
     <table class="kt-log-table">
         <thead>
@@ -41,7 +41,7 @@ else
 }
 
 <h2>Toppliste (Raskeste tider)</h2>
-@if (Top10.Any())
+@if (Top10?.Any() == true)
 {
     <table class="kt-log-table">
         <thead>
@@ -66,11 +66,6 @@ else
     <p>Ingen tider registrert ennå.</p>
 }
 
-else
-{
-    <p>Ingen bunkerlogg ennå.</p>
-}
-
 @code {
     public class PersonalTime
     {
@@ -89,7 +84,26 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        MyLog = await JS.InvokeAsync<List<PersonalTime>>("getMyTimes");
-        Top10 = await JS.InvokeAsync<List<TopTime>>("getTop10");
+        try
+        {
+            var myLogResult = await JS.InvokeAsync<List<PersonalTime>>("getMyTimes");
+            if (myLogResult != null)
+                MyLog = myLogResult;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Feil ved henting av egne tider: {ex.Message}");
+        }
+
+        try
+        {
+            var top10Result = await JS.InvokeAsync<List<TopTime>>("getTop10");
+            if (top10Result != null)
+                Top10 = top10Result;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Feil ved henting av toppliste: {ex.Message}");
+        }
     }
 }
