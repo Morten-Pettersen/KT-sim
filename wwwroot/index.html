@@ -212,25 +212,31 @@
             identity.open();
         }
 
-        // Kjør når DOM er klar
         document.addEventListener("DOMContentLoaded", function () {
-            // Vent til widgeten er lastet
-            if (window.netlifyIdentity) {
-                initializeNetlifyIdentity();
-            } else {
-                // Prøv igjen hvert 100ms i inntil 2 sekunder
-                let tries = 0;
-                const interval = setInterval(() => {
-                    if (window.netlifyIdentity) {
-                        clearInterval(interval);
-                        initializeNetlifyIdentity();
-                    } else if (++tries > 20) {
-                        clearInterval(interval);
-                        console.error("Netlify Identity ble ikke tilgjengelig.");
-                    }
-                }, 100);
-            }
+            let identityTries = 0;
+
+            const waitForIdentity = setInterval(() => {
+                const identity = window.netlifyIdentity;
+                if (identity) {
+                    clearInterval(waitForIdentity);
+
+                    identity.on("init", user => {
+                        console.log("Netlify Identity init:", user);
+                        if (!user) {
+                            identity.open(); // ← Popup kalles først NÅ
+                        } else {
+                            showApp(user);
+                        }
+                    });
+
+                    identity.init(); // ← MÅ kalles før open()!
+                } else if (++identityTries > 20) {
+                    clearInterval(waitForIdentity);
+                    console.error("Netlify Identity ble ikke tilgjengelig.");
+                }
+            }, 100);
         });
+
 
 
 
