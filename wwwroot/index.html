@@ -188,6 +188,7 @@
             }
 
             identity.on("init", user => {
+                console.log("Netlify Identity init:", user);
                 if (!user) {
                     identity.open(); // Vis popup!
                     document.getElementById("app").style.display = "none";
@@ -231,6 +232,7 @@
 
 
         function showApp(user) {
+            console.log("Viser app for bruker:", user);
             document.getElementById("app").style.display = "block";
             document.getElementById("user-info").style.display = "block";
 
